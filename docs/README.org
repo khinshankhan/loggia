@@ -1,0 +1,24 @@
+#+TITLE: loggia
+
+Games n stuff
+
+* Table of Contents :toc:
+- [[#contributing][Contributing]]
+- [[#code-of-conduct][Code of Conduct]]
+- [[#license][License]]
+
+* Contributing
+  There are many ways in which you can participate in the project, for example:
+
+  - See an open pull request? You can try reviewing it!
+  - Find a pesky bug or perhaps a neat place to refactor? Report it in an issue or fix it with a PR!
+  - Notice some weird or missing documentation? Fix or add it with a PR! (Lazy? Just report it in an issue :smile:)
+  - Want to give a recommendation for a feature? Go ahead and open an issue.
+
+  Feel free to open a pull request, check the [[file:CONTRIBUTING.org][contributing guide]] for more details.
+
+* Code of Conduct
+  WIP :shipit:
+
+* License
+  This project uses an MIT license, which can be viewed [[file:../LICENSE][here]].
