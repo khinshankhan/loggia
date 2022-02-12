@@ -1,5 +1,6 @@
 import React from "react";
+import { Heading } from "@chakra-ui/react";
 
-const Index = () => <>Loggia!</>;
+const Index = () => <Heading>Loggia!</Heading>;
 
 export default Index;
