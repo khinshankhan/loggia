@@ -44,11 +44,19 @@ const Board2D = ({ board, rowName = `row`, colName = `col` }: IBoardProps) => (
 );
 
 const Wordle = () => {
+  const word = `crane`;
+
   const [board2D, setBoard2D] = useState(new Board2DController(``, [6, 5], true));
   const { board: guesses } = board2D;
 
   const [guessNum, setGuessNum] = useState(0);
   const [guess, setGuess] = useState(``);
+
+  const determineColor = (letter: string, index: number) => {
+    if (word[index] === letter) return `green.500`;
+    if ([...word].some((wordLetter) => wordLetter === letter)) return `yellow.200`;
+    return `red.500`;
+  };
 
   useEffect(() => {
     if (guessNum >= 6) return;
@@ -70,10 +78,10 @@ const Wordle = () => {
     const newBoard = new Board2DController(``, [6, 5], false);
     newBoard.copy(board2D);
 
-    [...guess].forEach((_letter, i) => {
+    [...guess].forEach((letter, i) => {
       newBoard.updateRC(guessNum - 1, i, ({ ...cell }: IBoard2DCol<string>) => ({
         ...cell,
-        properties: { bgColor: `red.500` },
+        properties: { bgColor: determineColor(letter, i) },
       }));
     });
 
