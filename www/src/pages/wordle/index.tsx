@@ -17,7 +17,7 @@ const useKeyDownCapture = (listener: (e: KeyboardEvent) => void) => {
 };
 
 const Wordle = () => {
-  const word = `crane`;
+  const word = `CRANE`;
 
   const firstRender = useFirstRender();
 
@@ -56,7 +56,7 @@ const Wordle = () => {
   };
 
   useEffect(() => {
-    updateBoard(guessNum, (_i, letter, cell) => ({ ...cell, item: letter.toUpperCase() }));
+    updateBoard(guessNum, (_i, letter, cell) => ({ ...cell, item: letter }));
   }, [guess]);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ const Wordle = () => {
     const { key } = e;
 
     if (key.length === 1 && isAlpha(key)) {
-      setGuess((prev) => (prev.length !== 5 ? prev + key : prev));
+      setGuess((prev) => (prev.length !== 5 ? prev + key.toUpperCase() : prev));
     } else if (key === `Enter`) {
       setGuessNum((prev) => (prev !== 6 ? prev + 1 : prev));
     } else if (key === `Backspace`) {
