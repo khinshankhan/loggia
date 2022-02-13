@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Center, Container, Grid, GridItem, Heading } from "@chakra-ui/react";
 import { IBoard2D, Board2DController } from "src/utils/board";
+import { isAlpha } from "src/utils/validate";
 
 const Title = () => <Heading id="title">Wordle</Heading>;
 
@@ -45,6 +46,22 @@ const Board2D = ({ board, rowName = `row`, colName = `col` }: IBoardProps) => (
 const Wordle = () => {
   const [board2D] = useState(new Board2DController(``, [6, 5], true));
   const { board: guesses } = board2D;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const { key } = e;
+
+      if (key.length === 1 && isAlpha(key)) {
+        console.log({ key });
+      }
+    };
+
+    document.addEventListener(`keydown`, handleKeyDown);
+
+    return () => {
+      document.removeEventListener(`keydown`, handleKeyDown);
+    };
+  }, []);
 
   return (
     <div id="wordle">
