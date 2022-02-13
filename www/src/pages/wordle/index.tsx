@@ -1,39 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Heading } from "@chakra-ui/react";
 import { Board2D } from "src/components/wordle";
-import { useFirstRender } from "src/hooks";
+import { useFirstRender, useKeyDownCapture } from "src/hooks";
 import { IBoard2DCol, Board2DController, isAlpha } from "src/utils";
 
 const Title = () => <Heading id="title">Wordle</Heading>;
 
-const useKeyDownCapture = (listener: (e: KeyboardEvent) => void) => {
-  useEffect(() => {
-    document.addEventListener(`keydown`, listener);
-
-    return () => {
-      document.removeEventListener(`keydown`, listener);
-    };
-  }, []);
+const determineColor = (word: string, letter: string, index: number) => {
+  if (word[index] === letter) return `green.500`;
+  if ([...word].some((wordLetter) => wordLetter === letter)) return `yellow.200`;
+  return `red.500`;
 };
 
-const Wordle = () => {
-  const word = `CRANE`;
-
+const useGameLogic = (word: string) => {
   const firstRender = useFirstRender();
 
   const [board2D, setBoard2D] = useState(new Board2DController(``, [6, 5], true));
-  const { board: guesses } = board2D;
-
   const [guessNum, setGuessNum] = useState(0);
   const [guess, setGuess] = useState(``);
 
   const [won, setWon] = useState(false);
-
-  const determineColor = (letter: string, index: number) => {
-    if (word[index] === letter) return `green.500`;
-    if ([...word].some((wordLetter) => wordLetter === letter)) return `yellow.200`;
-    return `red.500`;
-  };
 
   const updateBoard = (
     rowNum: number,
@@ -62,14 +48,14 @@ const Wordle = () => {
   useEffect(() => {
     updateBoard(guessNum - 1, (i, letter, cell) => ({
       ...cell,
-      properties: { bgColor: determineColor(letter, i) },
+      properties: { bgColor: determineColor(word, letter, i) },
     }));
 
     setGuess(``);
     if (word === guess) setWon(true);
   }, [guessNum]);
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  useKeyDownCapture((e) => {
     const { key } = e;
 
     if (key.length === 1 && isAlpha(key)) {
@@ -79,9 +65,16 @@ const Wordle = () => {
     } else if (key === `Backspace`) {
       setGuess((prev) => (prev.length !== 0 ? prev.slice(0, -1) : prev));
     }
-  };
+  });
 
-  useKeyDownCapture(handleKeyDown);
+  return board2D;
+};
+
+const Wordle = () => {
+  const word = `CRANE`;
+
+  const board2D = useGameLogic(word);
+  const { board: guesses } = board2D;
 
   return (
     <div id="wordle">
