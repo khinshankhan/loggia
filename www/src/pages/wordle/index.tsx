@@ -1,23 +1,11 @@
 import React, { useState } from "react";
 import { Center, Container, Grid, GridItem, Heading } from "@chakra-ui/react";
+import { IBoard2D, Board2DController } from "src/utils/board";
 
 const Title = () => <Heading id="title">Wordle</Heading>;
 
-const generateBoard2D = (r: number, c: number, k: string = ``) => {
-  const board = [];
-  for (let i = 0; i < r; i++) {
-    const row = [];
-    for (let j = 0; j < c; j++) {
-      row.push(k);
-    }
-    board.push(row);
-  }
-
-  return board;
-};
-
 interface IBoardProps {
-  board: string[][];
+  board: IBoard2D<string>;
   rowName?: string;
   colName?: string;
 }
@@ -25,25 +13,25 @@ interface IBoardProps {
 const Board2D = ({ board, rowName = `row`, colName = `col` }: IBoardProps) => (
   <Container id="board">
     <Grid templateColumns="repeat(1, 1fr)" gap={1}>
-      {board.map((row, rowIndex) => (
+      {board.rows.map(({ cols, id: rowId }, rowIndex) => (
         <Grid
-          id={`${rowName}-${rowIndex}`}
-          // eslint-disable-next-line react/no-array-index-key
-          key={`${rowName}-${rowIndex}`}
-          templateColumns={`repeat(${row.length}, 1fr)`}
+          id={rowId}
+          key={rowId}
+          aria-label={`${rowName}-${rowIndex + 1}`}
+          templateColumns={`repeat(${cols.length}, 1fr)`}
           gap={1}
         >
-          {row.map((col, colIndex) => (
+          {cols.map(({ item, id: colId }, colIndex) => (
             <GridItem
-              id={`${colName}-${colIndex}`}
-              // eslint-disable-next-line react/no-array-index-key
-              key={`${colName}-${colIndex}`}
+              id={colId}
+              key={colId}
+              aria-label={`${colName}-${colIndex + 1}`}
               w="100%"
               bg="papayawhip"
               border="2px"
               borderColor="black"
             >
-              <Center h="20">{col}</Center>
+              <Center h="20">{item}</Center>
             </GridItem>
           ))}
         </Grid>
@@ -53,11 +41,12 @@ const Board2D = ({ board, rowName = `row`, colName = `col` }: IBoardProps) => (
 );
 
 const Wordle = () => {
-  const [guesses] = useState(generateBoard2D(6, 5));
+  const [board2D] = useState(new Board2DController(``, [6, 5], true));
+  const { board: guesses } = board2D;
 
   return (
     <div id="wordle">
-      <Title /> <Board2D board={guesses} />
+      <Title /> <Board2D board={guesses} rowName="word" colName="letter" />
     </div>
   );
 };
