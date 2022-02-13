@@ -2,11 +2,15 @@ import { v4 as uuidv4 } from "uuid";
 
 export interface IBoard2DCol<ItemType> {
   id: string;
+  context: { [key: string]: any };
+  properties: { [key: string]: any };
   item: ItemType;
 }
 
 export interface IBoard2DRow<ItemType> {
   id: string;
+  context: { [key: string]: any };
+  properties: { [key: string]: any };
   cols: IBoard2DCol<ItemType>[];
 }
 
@@ -50,10 +54,10 @@ export class Board2DController<ItemType> {
 
     const row = [];
     for (let i = 0; i < c; i++) {
-      row.push({ id: uuidv4(), item: newItem });
+      row.push({ id: uuidv4(), context: {}, properties: {}, item: newItem });
     }
 
-    return { id: uuidv4(), cols: row };
+    return { id: uuidv4(), context: {}, properties: {}, cols: row };
   }
 
   removeRow(rowNum: number) {
@@ -72,7 +76,13 @@ export class Board2DController<ItemType> {
 
     const rows = board.rows.map((row) => ({
       id: row.id,
-      cols: row.cols.map((col) => ({ ...col })),
+      cols: row.cols.map((col) => ({
+        ...col,
+        context: { ...col.context },
+        properties: { ...col.properties },
+      })),
+      context: { ...row.context },
+      properties: { ...row.properties },
     }));
     this.board.rows = rows;
   }

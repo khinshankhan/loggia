@@ -13,15 +13,16 @@ interface IBoardProps {
 const Board2D = ({ board, rowName = `row`, colName = `col` }: IBoardProps) => (
   <Container id="board">
     <Grid templateColumns="repeat(1, 1fr)" gap={1}>
-      {board.rows.map(({ cols, id: rowId }, rowIndex) => (
+      {board.rows.map(({ cols: row, properties: rowProperties, id: rowId }, rowIndex) => (
         <Grid
           id={rowId}
           key={rowId}
           aria-label={`${rowName}-${rowIndex + 1}`}
-          templateColumns={`repeat(${cols.length}, 1fr)`}
+          templateColumns={`repeat(${row.length}, 1fr)`}
           gap={1}
+          {...rowProperties}
         >
-          {cols.map(({ item, id: colId }, colIndex) => (
+          {row.map(({ item, properties: colProperties, id: colId }, colIndex) => (
             <GridItem
               id={colId}
               key={colId}
@@ -30,6 +31,7 @@ const Board2D = ({ board, rowName = `row`, colName = `col` }: IBoardProps) => (
               bg="papayawhip"
               border="2px"
               borderColor="black"
+              {...colProperties}
             >
               <Center h="20">{item}</Center>
             </GridItem>
