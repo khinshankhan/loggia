@@ -52,6 +52,8 @@ const Wordle = () => {
   const [guessNum, setGuessNum] = useState(0);
   const [guess, setGuess] = useState(``);
 
+  const [won, setWon] = useState(false);
+
   const determineColor = (letter: string, index: number) => {
     if (word[index] === letter) return `green.500`;
     if ([...word].some((wordLetter) => wordLetter === letter)) return `yellow.200`;
@@ -59,7 +61,7 @@ const Wordle = () => {
   };
 
   useEffect(() => {
-    if (guessNum >= 6) return;
+    if (won || guessNum >= 6) return;
     const newBoard = new Board2DController(``, [6, 5], false);
     newBoard.copy(board2D);
 
@@ -76,7 +78,7 @@ const Wordle = () => {
   }, [guess]);
 
   useEffect(() => {
-    if (guessNum > 6) return;
+    if (won || guessNum > 6) return;
     const newBoard = new Board2DController(``, [6, 5], false);
     newBoard.copy(board2D);
 
@@ -88,6 +90,7 @@ const Wordle = () => {
     });
 
     setBoard2D(newBoard);
+    if (word === guess) setWon(true);
     setGuess(``);
   }, [guessNum]);
 
@@ -95,7 +98,6 @@ const Wordle = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const { key } = e;
 
-      console.log({ key });
       if (key.length === 1 && isAlpha(key)) {
         setGuess((prev) => (prev.length !== 5 ? prev + key : prev));
       } else if (key === `Enter`) {
