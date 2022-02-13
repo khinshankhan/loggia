@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Center, Container, Grid, GridItem, Heading } from "@chakra-ui/react";
-import { IBoard2D, Board2DController } from "src/utils/board";
+import { IBoard2D, IBoard2DCol, Board2DController } from "src/utils/board";
 import { isAlpha } from "src/utils/validate";
 
 const Title = () => <Heading id="title">Wordle</Heading>;
@@ -44,15 +44,52 @@ const Board2D = ({ board, rowName = `row`, colName = `col` }: IBoardProps) => (
 );
 
 const Wordle = () => {
-  const [board2D] = useState(new Board2DController(``, [6, 5], true));
+  const [board2D, setBoard2D] = useState(new Board2DController(``, [6, 5], true));
   const { board: guesses } = board2D;
+
+  const [guessNum, setGuessNum] = useState(0);
+  const [guess, setGuess] = useState(``);
+
+  useEffect(() => {
+    if (guessNum >= 6) return;
+    const newBoard = new Board2DController(``, [6, 5], false);
+    newBoard.copy(board2D);
+
+    [...guess].forEach((letter, i) => {
+      newBoard.updateRC(guessNum, i, ({ ...cell }: IBoard2DCol<string>) => ({
+        ...cell,
+        item: letter.toUpperCase(),
+      }));
+    });
+
+    setBoard2D(newBoard);
+  }, [guess]);
+
+  useEffect(() => {
+    if (guessNum > 6) return;
+    const newBoard = new Board2DController(``, [6, 5], false);
+    newBoard.copy(board2D);
+
+    [...guess].forEach((_letter, i) => {
+      newBoard.updateRC(guessNum - 1, i, ({ ...cell }: IBoard2DCol<string>) => ({
+        ...cell,
+        properties: { bgColor: `red.500` },
+      }));
+    });
+
+    setBoard2D(newBoard);
+    setGuess(``);
+  }, [guessNum]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const { key } = e;
 
+      console.log({ key });
       if (key.length === 1 && isAlpha(key)) {
-        console.log({ key });
+        setGuess((prev) => (prev.length !== 5 ? prev + key : prev));
+      } else if (key === `Enter`) {
+        setGuessNum((prev) => (prev !== 6 ? prev + 1 : prev));
       }
     };
 

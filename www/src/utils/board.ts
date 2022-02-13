@@ -86,4 +86,12 @@ export class Board2DController<ItemType> {
     }));
     this.board.rows = rows;
   }
+
+  updateRC(
+    r: number,
+    c: number,
+    cb: ({ id, context, properties, item }: IBoard2DCol<ItemType>) => IBoard2DCol<ItemType>
+  ) {
+    this.board.rows[r].cols[c] = cb(this.board.rows[r].cols[c]);
+  }
 }
