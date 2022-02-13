@@ -1,50 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { Center, Container, Grid, GridItem, Heading } from "@chakra-ui/react";
-import { IBoard2D, IBoard2DCol, Board2DController } from "src/utils/board";
-import { isAlpha } from "src/utils/validate";
+import { Heading } from "@chakra-ui/react";
+import { Board2D } from "src/components/wordle";
+import { useFirstRender } from "src/hooks";
+import { IBoard2DCol, Board2DController, isAlpha } from "src/utils";
 
 const Title = () => <Heading id="title">Wordle</Heading>;
 
-interface IBoardProps {
-  board: IBoard2D<string>;
-  rowName?: string;
-  colName?: string;
-}
+const useKeyDownCapture = (listener: (e: KeyboardEvent) => void) => {
+  useEffect(() => {
+    document.addEventListener(`keydown`, listener);
 
-const Board2D = ({ board, rowName = `row`, colName = `col` }: IBoardProps) => (
-  <Container id="board">
-    <Grid templateColumns="repeat(1, 1fr)" gap={1}>
-      {board.rows.map(({ cols: row, properties: rowProperties, id: rowId }, rowIndex) => (
-        <Grid
-          id={rowId}
-          key={rowId}
-          aria-label={`${rowName}-${rowIndex + 1}`}
-          templateColumns={`repeat(${row.length}, 1fr)`}
-          gap={1}
-          {...rowProperties}
-        >
-          {row.map(({ item, properties: colProperties, id: colId }, colIndex) => (
-            <GridItem
-              id={colId}
-              key={colId}
-              aria-label={`${colName}-${colIndex + 1}`}
-              w="100%"
-              bg="papayawhip"
-              border="2px"
-              borderColor="black"
-              {...colProperties}
-            >
-              <Center h="20">{item}</Center>
-            </GridItem>
-          ))}
-        </Grid>
-      ))}
-    </Grid>
-  </Container>
-);
+    return () => {
+      document.removeEventListener(`keydown`, listener);
+    };
+  }, []);
+};
 
 const Wordle = () => {
   const word = `crane`;
+
+  const firstRender = useFirstRender();
 
   const [board2D, setBoard2D] = useState(new Board2DController(``, [6, 5], true));
   const { board: guesses } = board2D;
@@ -60,59 +35,53 @@ const Wordle = () => {
     return `red.500`;
   };
 
-  useEffect(() => {
-    if (won || guessNum >= 6) return;
+  const updateBoard = (
+    rowNum: number,
+    updateCell: (index: number, letter: string, cell: IBoard2DCol<string>) => IBoard2DCol<string>
+  ) => {
+    if (won || guessNum > 6 || firstRender) return;
+
     const newBoard = new Board2DController(``, [6, 5], false);
     newBoard.copy(board2D);
 
     [...Array(word.length).keys()].forEach((i) => {
-      const letter = guess[i];
+      const letter = guess[i] || ``;
 
-      newBoard.updateRC(guessNum, i, ({ ...cell }: IBoard2DCol<string>) => ({
-        ...cell,
-        item: letter ? letter.toUpperCase() : ``,
-      }));
+      newBoard.updateRC(rowNum, i, ({ ...cell }: IBoard2DCol<string>) =>
+        updateCell(i, letter, cell)
+      );
     });
 
     setBoard2D(newBoard);
+  };
+
+  useEffect(() => {
+    updateBoard(guessNum, (_i, letter, cell) => ({ ...cell, item: letter.toUpperCase() }));
   }, [guess]);
 
   useEffect(() => {
-    if (won || guessNum > 6) return;
-    const newBoard = new Board2DController(``, [6, 5], false);
-    newBoard.copy(board2D);
+    updateBoard(guessNum - 1, (i, letter, cell) => ({
+      ...cell,
+      properties: { bgColor: determineColor(letter, i) },
+    }));
 
-    [...guess].forEach((letter, i) => {
-      newBoard.updateRC(guessNum - 1, i, ({ ...cell }: IBoard2DCol<string>) => ({
-        ...cell,
-        properties: { bgColor: determineColor(letter, i) },
-      }));
-    });
-
-    setBoard2D(newBoard);
-    if (word === guess) setWon(true);
     setGuess(``);
+    if (word === guess) setWon(true);
   }, [guessNum]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const { key } = e;
+  const handleKeyDown = (e: KeyboardEvent) => {
+    const { key } = e;
 
-      if (key.length === 1 && isAlpha(key)) {
-        setGuess((prev) => (prev.length !== 5 ? prev + key : prev));
-      } else if (key === `Enter`) {
-        setGuessNum((prev) => (prev !== 6 ? prev + 1 : prev));
-      } else if (key === `Backspace`) {
-        setGuess((prev) => (prev.length !== 0 ? prev.slice(0, -1) : prev));
-      }
-    };
+    if (key.length === 1 && isAlpha(key)) {
+      setGuess((prev) => (prev.length !== 5 ? prev + key : prev));
+    } else if (key === `Enter`) {
+      setGuessNum((prev) => (prev !== 6 ? prev + 1 : prev));
+    } else if (key === `Backspace`) {
+      setGuess((prev) => (prev.length !== 0 ? prev.slice(0, -1) : prev));
+    }
+  };
 
-    document.addEventListener(`keydown`, handleKeyDown);
-
-    return () => {
-      document.removeEventListener(`keydown`, handleKeyDown);
-    };
-  }, []);
+  useKeyDownCapture(handleKeyDown);
 
   return (
     <div id="wordle">
