@@ -63,10 +63,12 @@ const Wordle = () => {
     const newBoard = new Board2DController(``, [6, 5], false);
     newBoard.copy(board2D);
 
-    [...guess].forEach((letter, i) => {
+    [...Array(word.length).keys()].forEach((i) => {
+      const letter = guess[i];
+
       newBoard.updateRC(guessNum, i, ({ ...cell }: IBoard2DCol<string>) => ({
         ...cell,
-        item: letter.toUpperCase(),
+        item: letter ? letter.toUpperCase() : ``,
       }));
     });
 
@@ -98,6 +100,8 @@ const Wordle = () => {
         setGuess((prev) => (prev.length !== 5 ? prev + key : prev));
       } else if (key === `Enter`) {
         setGuessNum((prev) => (prev !== 6 ? prev + 1 : prev));
+      } else if (key === `Backspace`) {
+        setGuess((prev) => (prev.length !== 0 ? prev.slice(0, -1) : prev));
       }
     };
 
